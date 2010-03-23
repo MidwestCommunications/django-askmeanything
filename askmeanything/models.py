@@ -9,7 +9,7 @@ class Poll(models.Model):
     question = models.CharField(max_length=200)
     
     #want to restrict owner to be a user, group, or site
-    OWNER_TYPE_CHOICES = setting.OWNER_TYPE_CHOICES or models.Q(app_label='auth', model='user') | models.Q(app_label='auth', model='group') | models.Q(app_label='sites', model='site')
+    OWNER_TYPE_CHOICES = getattr(settings, 'POLL_OWNER_TYPE_CHOICES', models.Q(app_label='auth', model='user') | models.Q(app_label='auth', model='group') | models.Q(app_label='sites', model='site'))
     owner_type = models.ForeignKey(ContentType, limit_choices_to=OWNER_TYPE_CHOICES)
     owner_id = models.PositiveIntegerField()
     owner = generic.GenericForeignKey('owner_type', 'owner_id')
@@ -22,13 +22,13 @@ class Poll(models.Model):
     class Meta:
         ordering = ['-created']
 
-class ResponseChoice(models.Model):
+class Response(models.Model):
     poll = models.ForeignKey(Poll)
-    choice = models.CharField(max_length=200)
-    votes = models.IntegerField()
+    answer = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0, editable=False)
     
     def __unicode__(self):
-        return self.choice
+        return self.answer
     
     class Meta:
         order_with_respect_to = 'poll'
