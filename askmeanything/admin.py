@@ -8,4 +8,4 @@ class AnswerInline(admin.TabularInline):
 class PollAdmin(admin.ModelAdmin):
     inlines = [AnswerInline]
 
-admin.site.register(Poll)
+admin.site.register(Poll, PollAdmin)

@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django import forms
 
@@ -26,23 +26,34 @@ def new(request):
     owner_choices = []
     
     user_ct_id = ContentType.objects.get(app_label='auth', model='user').id
-    owner_choices.append((str(user_ct_id) + ',' + str(request.user.id), 'User: ' + request.user.username))
+    owner_choices.append((str(user_ct_id) + ' ' + str(request.user.id), 'User: ' + request.user.username))
     
     group_ct_id = ContentType.objects.get(app_label='auth', model='group').id
     for group in request.user.groups.all():
-        owner_choices.append((str(group_ct_id) + ',' + str(group.id), 'Group: ' + group.name))
+        owner_choices.append((str(group_ct_id) + ' ' + str(group.id), 'Group: ' + group.name))
     
     site_ct_id = ContentType.objects.get(app_label='sites', model='site').id
     site = Site.objects.get_current()
-    owner_choices.append((str(site_ct_id) + ',' + str(site.id), 'Site: ' + site.name))
+    owner_choices.append((str(site_ct_id) + ' ' + str(site.id), 'Site: ' + site.name))
     
-    owner_form = forms.Form()
-    owner_form.fields['owner'] = forms.ChoiceField(choices=owner_choices)
-    poll_form = PollForm()
-    answer_formset = AnswerFormSet(queryset=Response.objects.none())
+    if request.method == 'POST':
+        poll_form = PollForm(request.POST)
+        poll_form.fields['owner'] = forms.ChoiceField(choices=owner_choices)
+        if poll_form.is_valid():
+            (owner_ct_id, owner_id) = poll_form.cleaned_data['owner'].split()
+            owner_object = ContentType.objects.get(id=owner_ct_id).get_object_for_this_type(id=owner_id)
+            new_poll = Poll(question=poll_form.cleaned_data['question'], owner=owner_object)
+            new_poll.save()
+            answer_formset = AnswerFormSet(request.POST, instance=new_poll)
+            if answer_formset.is_valid():
+                answer_formset.save()
+                return HttpResponseRedirect('../' + str(new_poll.id) + '/')
+            else:
+                new_poll.delete()
     
-    #this stuff is just for testing
-    output = '<html><body><form><table>'
-    output += str(owner_form) + str(poll_form) + str(answer_formset)
-    output += '</table></form></html></body>'
-    return HttpResponse(output)
+    else:
+        poll_form = PollForm()
+        poll_form.fields['owner'] = forms.ChoiceField(choices=owner_choices)
+        answer_formset = AnswerFormSet()
+        
+    return render_to_response('poll_create.html', {'poll_form': poll_form, 'answer_formset': answer_formset})

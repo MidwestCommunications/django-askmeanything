@@ -30,5 +30,5 @@ class Response(models.Model):
     def __unicode__(self):
         return self.answer
     
-    class Meta:
-        order_with_respect_to = 'poll'
+#    class Meta:
+#        order_with_respect_to = 'poll'
