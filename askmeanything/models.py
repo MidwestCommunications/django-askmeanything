@@ -1,15 +1,18 @@
 from operator import or_
+
 from django.db import models
-from django.conf import settings
+
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-from django.contrib.auth.models import User, Group
-from django.contrib.sites.models import Site
+from django.contrib.auth.models import User
+
+import poll_settings
 
 class Poll(models.Model):
     question = models.CharField(max_length=200)
-    created = models.DateTimeField(auto_now_add=True)
     
+    creator = models.ForeignKey(User, related_name='polls')
+    created = models.DateTimeField(auto_now_add=True)
     open = models.BooleanField(default=True)
     
     def __unicode__(self):
@@ -20,30 +23,21 @@ class Poll(models.Model):
         get_latest_by = ['created']
 
 class Response(models.Model):
-    poll = models.ForeignKey(Poll)
+    poll = models.ForeignKey(Poll, related_name='responses')
     answer = models.CharField(max_length=200)
     votes = models.IntegerField(default=0, editable=False)
     
     def __unicode__(self):
         return self.answer
 
-def get_publication_choices():
-    """looks for POLL_PUBLICATION_TYPES in settings, defaults to profile & site"""
-    default_list = []
-    profile = getattr(settings, 'AUTH_PROFILE_MODULE', None)
-    if profile:
-        default_list.append(profile)
-    default_list.append('sites.site')
-    
-    app_model_list = getattr(settings, 'POLL_PUBLICATION_TYPES', default_list)
+def get_publication_choices():   
     q_list = []
-    for app_model in app_model_list:
-        (app_name, model_name) = app_model.rsplit('.', 1)
+    for (app_name, model_name) in poll_settings.PUBLICATION_TYPES:
         q_list.append(models.Q(app_label=app_name, model=model_name))
     return reduce(or_, q_list)
 
 class PublishedPoll(models.Model):
-    poll = models.ForeignKey(Poll)
+    poll = models.ForeignKey(Poll, related_name='publishings')
     
     publication_type = models.ForeignKey(ContentType, limit_choices_to=get_publication_choices())
     publication_id = models.PositiveIntegerField()
