@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django import forms
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 
@@ -22,7 +22,8 @@ def vote(request, pollid):
     return HttpResponse("You're voting on poll %s." % pollid)
 
 @login_required
-def new(request):
+#@permission_required('askmeanything.
+def new(request, pollid=None):
     owner_choices = []
     
     user_ct_id = ContentType.objects.get(app_label='auth', model='user').id
@@ -39,18 +40,19 @@ def new(request):
     if request.method == 'POST':
         poll_form = PollForm(request.POST)
         poll_form.fields['owner'] = forms.ChoiceField(choices=owner_choices)
+        
         if poll_form.is_valid():
             (owner_ct_id, owner_id) = poll_form.cleaned_data['owner'].split()
             owner_object = ContentType.objects.get(id=owner_ct_id).get_object_for_this_type(id=owner_id)
             new_poll = Poll(question=poll_form.cleaned_data['question'], owner=owner_object)
             new_poll.save()
+            
             answer_formset = AnswerFormSet(request.POST, instance=new_poll)
             if answer_formset.is_valid():
                 answer_formset.save()
                 return HttpResponseRedirect('../' + str(new_poll.id) + '/')
             else:
                 new_poll.delete()
-    
     else:
         poll_form = PollForm()
         poll_form.fields['owner'] = forms.ChoiceField(choices=owner_choices)

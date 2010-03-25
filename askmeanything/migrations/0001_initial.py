@@ -11,20 +11,29 @@ class Migration:
         db.create_table('askmeanything_poll', (
             ('id', orm['askmeanything.Poll:id']),
             ('question', orm['askmeanything.Poll:question']),
-            ('owner_type', orm['askmeanything.Poll:owner_type']),
-            ('owner_id', orm['askmeanything.Poll:owner_id']),
             ('created', orm['askmeanything.Poll:created']),
+            ('open', orm['askmeanything.Poll:open']),
         ))
         db.send_create_signal('askmeanything', ['Poll'])
         
-        # Adding model 'ResponseChoice'
-        db.create_table('askmeanything_responsechoice', (
-            ('id', orm['askmeanything.ResponseChoice:id']),
-            ('poll', orm['askmeanything.ResponseChoice:poll']),
-            ('choice', orm['askmeanything.ResponseChoice:choice']),
-            ('votes', orm['askmeanything.ResponseChoice:votes']),
+        # Adding model 'Response'
+        db.create_table('askmeanything_response', (
+            ('id', orm['askmeanything.Response:id']),
+            ('poll', orm['askmeanything.Response:poll']),
+            ('answer', orm['askmeanything.Response:answer']),
+            ('votes', orm['askmeanything.Response:votes']),
         ))
-        db.send_create_signal('askmeanything', ['ResponseChoice'])
+        db.send_create_signal('askmeanything', ['Response'])
+        
+        # Adding model 'PublishedPoll'
+        db.create_table('askmeanything_publishedpoll', (
+            ('id', orm['askmeanything.PublishedPoll:id']),
+            ('poll', orm['askmeanything.PublishedPoll:poll']),
+            ('publication_type', orm['askmeanything.PublishedPoll:publication_type']),
+            ('publication_id', orm['askmeanything.PublishedPoll:publication_id']),
+            ('published', orm['askmeanything.PublishedPoll:published']),
+        ))
+        db.send_create_signal('askmeanything', ['PublishedPoll'])
         
     
     
@@ -33,8 +42,11 @@ class Migration:
         # Deleting model 'Poll'
         db.delete_table('askmeanything_poll')
         
-        # Deleting model 'ResponseChoice'
-        db.delete_table('askmeanything_responsechoice')
+        # Deleting model 'Response'
+        db.delete_table('askmeanything_response')
+        
+        # Deleting model 'PublishedPoll'
+        db.delete_table('askmeanything_publishedpoll')
         
     
     
@@ -42,15 +54,21 @@ class Migration:
         'askmeanything.poll': {
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'owner_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
-            'owner_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'open': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
             'question': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
-        'askmeanything.responsechoice': {
-            'choice': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+        'askmeanything.publishedpoll': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'poll': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['askmeanything.Poll']"}),
-            'votes': ('django.db.models.fields.IntegerField', [], {})
+            'publication_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'publication_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'published': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'})
+        },
+        'askmeanything.response': {
+            'answer': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'poll': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['askmeanything.Poll']"}),
+            'votes': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         'contenttypes.contenttype': {
             'Meta': {'unique_together': "(('app_label', 'model'),)", 'db_table': "'django_content_type'"},
