@@ -16,6 +16,6 @@ class AnswerFormSet(ResponseFormSet):
 class PublishForm(forms.Form):
     publication_type_id = forms.IntegerField(widget=forms.HiddenInput)
     publication_id = forms.IntegerField(widget=forms.HiddenInput)
-    publish = forms.BooleanField(required=False)
+    publish = forms.BooleanField(initial=False, required=False)
 
 PublishFormSet = formset_factory(PublishForm, extra=0)

@@ -93,3 +93,9 @@ INSTALLED_APPS = (
     'authority',
     'askmeanything'
 )
+
+POLL_PUBLICATION_TYPES = (
+    'auth.user',
+    'auth.group',
+    'sites.site'
+)

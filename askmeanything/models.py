@@ -11,8 +11,8 @@ import poll_settings
 class Poll(models.Model):
     question = models.CharField(max_length=200)
     
-    creator = models.ForeignKey(User, related_name='polls')
-    created = models.DateTimeField(auto_now_add=True)
+    creator = models.ForeignKey(User, related_name='polls', editable=False)
+    created = models.DateTimeField(auto_now_add=True, editable=False)
     open = models.BooleanField(default=True)
     
     def __unicode__(self):
@@ -43,10 +43,10 @@ class PublishedPoll(models.Model):
     publication_id = models.PositiveIntegerField()
     publication = generic.GenericForeignKey('publication_type', 'publication_id')
     
-    published = models.DateTimeField(auto_now_add=True, editable=False)
+    published = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
-        return '"' + str(self.poll) + '" on ' + str(publication)
+        return '"' + str(self.poll) + '" on ' + str(self.publication)
     
     class Meta:
         ordering = ['-published']

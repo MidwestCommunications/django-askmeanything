@@ -1,8 +1,6 @@
 <form method='post'>
     <table>
-        {% for form in publication_forms %}
-        {{ form.as_table }}
-        {% endfor %}
+        {{ publication_formset.as_table }}
         <tr><td><input type='submit' value='Publish Poll' /></td><td>&nbsp;</td></tr>
     </table>
 </form>

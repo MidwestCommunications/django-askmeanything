@@ -1,11 +1,22 @@
 from django.conf import settings
-from django.contrib.sites.models import Site
+
+from django.contrib.contenttypes.models import ContentType
 
 import authority
-from authority import permissions
+from authority.permissions import BasePermission
 
-class SitePermission(permissions.BasePermission):
-    label = 'site_permission'
-    checks = ('publish_poll',)
+from poll_settings import PUBLICATION_TYPES
 
-authority.register(Site, SitePermission)
+def poll_permission_factory(object_model):
+    permission_class_name = object_model.__name__ + 'Permission'
+    permission_dict = {
+        'label': object_model.__name__.lower() + '_permission',
+        'checks': ('publish_poll',)
+    }
+    return type(permission_class_name, (BasePermission,), permission_dict)
+
+poll_permissions = {}
+for (app_name, model_name) in PUBLICATION_TYPES:
+    object_model = ContentType.objects.get(app_label=app_name, model=model_name).model_class()
+    poll_permissions[model_name] = poll_permission_factory(object_model)
+    authority.register(object_model, poll_permissions[model_name])
