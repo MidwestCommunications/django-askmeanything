@@ -15,13 +15,12 @@ from forms import PollForm, AnswerFormSet, PublishFormSet
 import poll_settings
 from permissions import poll_permissions
 
-def list(request):
-    return HttpResponse("You're looking at a list of polls.")
-
 def show(request, pollid):
+    #this might be AJAX only
     return HttpResponse("You're looking at poll %s." % pollid)
 
 def results(request, pollid):
+    #this will probably only be used for AJAX
     return HttpResponse("You're looking at the results of poll %s." % pollid)
 
 def vote(request, pollid):
