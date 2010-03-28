@@ -1,9 +1,10 @@
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseGone
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.conf import settings
 from django.utils.encoding import smart_unicode
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.http import require_POST
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
@@ -16,15 +17,28 @@ import poll_settings
 from permissions import poll_permissions
 
 def show(request, pollid):
-    #this might be AJAX only
+    #this will be the src of a script tag
+    poll = get_object_or_404(Poll, id=pollid)
+    
     return HttpResponse("You're looking at poll %s." % pollid)
 
 def results(request, pollid):
     #this will probably only be used for AJAX
+    poll = get_object_or_404(Poll, id=pollid)
+    
     return HttpResponse("You're looking at the results of poll %s." % pollid)
 
+@require_POST
 def vote(request, pollid):
-    return HttpResponse("You're voting on poll %s." % pollid)
+    #this will probably only be used for AJAX
+    poll = get_object_or_404(Poll, id=pollid)
+    
+    votedpolls = request.session.setdefault('votedpolls', [])
+    if pollid in votedpolls:
+        return HttpResponseForbidden("You have already voted in this poll.")
+    request.session['votedpolls'].append(pollid)
+    
+    return HttpResponseRedirect("../results")
 
 @permission_required('askmeanything.add_poll')
 def new(request):
@@ -49,7 +63,7 @@ def new(request):
 
 @permission_required('askmeanything.add_publishedpoll')
 def publish(request, pollid):
-    poll = Poll.objects.get(id=pollid)
+    poll = get_object_or_404(Poll, id=pollid)
     
     if not poll.creator == request.user and not request.user.is_superuser:
         return HttpResponseForbidden("You can only publish polls that you have created.")
