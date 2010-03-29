@@ -1,6 +1,6 @@
-<div class="pollform">
+<div id="poll{{ poll.id }}display" class="polldisplay">
     <h3 class="pollquestion">{{ poll.question }}</h3>
-    <form action="/polls/{{ poll.id }}/vote/" method="post">
+    <form id="poll{{ poll.id }}form" action="/polls/{{ poll.id }}/vote/" method="POST">
     <ul class="pollresponselist">
     {% for response in poll.responses.all %}
         <li class="pollresponse">

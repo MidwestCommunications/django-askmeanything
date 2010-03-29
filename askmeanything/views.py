@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.db.models import Sum
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
@@ -25,22 +26,38 @@ def show(request, pollid):
     poll_form = render_to_string('poll_form.html', {'poll': poll})
     return render_to_response('poll.js', {'poll': poll, 'poll_form': poll_form}, mimetype='text/javascript')
 
-def results(request, pollid):
-    #loaded by xmlhttprequest
-    poll = get_object_or_404(Poll, id=pollid)
-    return HttpResponse("You're looking at the results of poll %s." % pollid)
-
 @require_POST
 def vote(request, pollid):
     #loaded by xmlhttprequest
     poll = get_object_or_404(Poll, id=pollid)
     
+    try:
+        selected_response = poll.responses.get(id=request.raw_post_data)
+    except (KeyError, Response.DoesNotExist):
+        #display results without voting
+        return HttpResponseRedirect(reverse('askmeanything.views.results', kwargs={'pollid': pollid}))
+    else:
+        selected_response.votes += 1
+        selected_response.save()
+    
     votedpolls = request.session.setdefault('votedpolls', [])
-    if pollid in votedpolls:
-        return HttpResponseForbidden("You have already voted in this poll.")
-    request.session['votedpolls'].append(pollid)
+    #if pollid in votedpolls:
+    #    return HttpResponseForbidden("You have already voted in this poll.")
+    #request.session['votedpolls'].append(pollid)
     
     return HttpResponseRedirect(reverse('askmeanything.views.results', kwargs={'pollid': pollid}))
+
+def results(request, pollid):
+    #loaded by xmlhttprequest
+    poll = get_object_or_404(Poll, id=pollid)
+    total_votes = float(poll.responses.aggregate(Sum('votes'))['votes__sum']) or 1.0
+    poll_results = []
+    for response in poll.responses.all():
+        poll_results.append({
+            'response': response,
+            'percent': round(response.votes / total_votes * 100)
+        })
+    return render_to_response('poll_results.html', {'poll': poll, 'poll_results': poll_results}, mimetype='text/plain')
 
 @permission_required('askmeanything.add_poll')
 def new(request):
@@ -89,7 +106,7 @@ def publish(request, pollid):
                             #update published datetime
                             published_poll.save()
             if published_to:
-                #successfully posted
+                #successfully posted, should redirect somewhere
                 return HttpResponse("You published poll %s." % pollid)
         return HttpResponse("The poll was not published.")
     

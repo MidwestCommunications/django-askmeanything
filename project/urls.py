@@ -8,6 +8,7 @@ authority.autodiscover()
 urlpatterns = patterns('',
     # Example:
     (r'^polls/', include('project.askmeanything.urls')),
+    (r'^test/$', 'project.views.test'),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs' 
     # to INSTALLED_APPS to enable admin documentation:

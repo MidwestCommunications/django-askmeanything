@@ -1,0 +1,11 @@
+<div id="poll{{ poll.id }}results" class="polldisplay">
+    <h3 class="pollquestion">{{ poll.question }}</h3>
+    <ul class="pollresponselist">
+    {% for result in poll_results %}
+        <li class="pollresponse">
+            <span class="responsetotals">{{ result.percent }}% ({{ result.response.votes }} votes)</span>
+            <span class="responseanswer">{{ result.response.answer }}</span>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
