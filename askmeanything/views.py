@@ -5,6 +5,9 @@ from django.conf import settings
 from django.utils.encoding import smart_unicode
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.http import require_POST
+from django.core.urlresolvers import reverse
+from django.template import RequestContext
+from django.template.loader import render_to_string
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
@@ -19,18 +22,17 @@ from permissions import poll_permissions
 def show(request, pollid):
     #this will be the src of a script tag
     poll = get_object_or_404(Poll, id=pollid)
-    
-    return HttpResponse("You're looking at poll %s." % pollid)
+    poll_form = render_to_string('poll_form.html', {'poll': poll})
+    return render_to_response('poll.js', {'poll': poll, 'poll_form': poll_form}, mimetype='text/javascript')
 
 def results(request, pollid):
-    #this will probably only be used for AJAX
+    #loaded by xmlhttprequest
     poll = get_object_or_404(Poll, id=pollid)
-    
     return HttpResponse("You're looking at the results of poll %s." % pollid)
 
 @require_POST
 def vote(request, pollid):
-    #this will probably only be used for AJAX
+    #loaded by xmlhttprequest
     poll = get_object_or_404(Poll, id=pollid)
     
     votedpolls = request.session.setdefault('votedpolls', [])
@@ -38,7 +40,7 @@ def vote(request, pollid):
         return HttpResponseForbidden("You have already voted in this poll.")
     request.session['votedpolls'].append(pollid)
     
-    return HttpResponseRedirect("../results")
+    return HttpResponseRedirect(reverse('askmeanything.views.results', kwargs={'pollid': pollid}))
 
 @permission_required('askmeanything.add_poll')
 def new(request):
@@ -46,20 +48,19 @@ def new(request):
         poll_form = PollForm(request.POST)
         
         if poll_form.is_valid():
-            new_poll = Poll(question=poll_form.cleaned_data['question'], creator=request.user)
-            new_poll.save()
+            new_poll = Poll.objects.create(question=poll_form.cleaned_data['question'], creator=request.user)
             
             answer_formset = AnswerFormSet(request.POST, instance=new_poll)
             if answer_formset.is_valid():
                 answer_formset.save()
-                return HttpResponseRedirect('../' + str(new_poll.id) + '/publish/')
+                return HttpResponseRedirect(reverse('askmeanything.views.publish', kwargs={'pollid': new_poll}))
             else:
                 new_poll.delete()
     
     poll_form = PollForm()
     answer_formset = AnswerFormSet()
         
-    return render_to_response('poll_create.html', {'poll_form': poll_form, 'answer_formset': answer_formset})
+    return render_to_response('poll_create.html', {'poll_form': poll_form, 'answer_formset': answer_formset}, context_instance=RequestContext(request))
 
 @permission_required('askmeanything.add_publishedpoll')
 def publish(request, pollid):
@@ -85,9 +86,10 @@ def publish(request, pollid):
                         published_to.append(str(publication))
                         (published_poll, created) = PublishedPoll.objects.get_or_create(poll=poll, publication_type=publication_type, publication_id=publication_id)
                         if not created:
+                            #update published datetime
                             published_poll.save()
             if published_to:
-                #success!
+                #successfully posted
                 return HttpResponse("You published poll %s." % pollid)
         return HttpResponse("The poll was not published.")
     
@@ -112,5 +114,5 @@ def publish(request, pollid):
         publication_formset = PublishFormSet(initial=publication_form_data)
         for i in xrange(len(publication_formset.forms)):
             publication_formset.forms[i].fields['publish'].label = publication_form_labels[i]
-        return render_to_response('poll_publish.html', {'publication_formset': publication_formset})
+        return render_to_response('poll_publish.html', {'publication_formset': publication_formset}, context_instance=RequestContext(request))
     return HttpResponseForbidden("You do not have permission to publish anywhere.")

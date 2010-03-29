@@ -1,0 +1,1 @@
+document.write('{{ poll_form|escapejs }}');

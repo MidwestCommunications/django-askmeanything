@@ -18,6 +18,10 @@ class Poll(models.Model):
     def __unicode__(self):
         return self.question
     
+    @models.permalink
+    def get_absolute_url(self):
+        return ('askmeanything.views.show', (), {'pollid': self.id})
+    
     class Meta:
         ordering = ['-created']
         get_latest_by = ['created']

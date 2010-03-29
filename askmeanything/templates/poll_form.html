@@ -1,0 +1,14 @@
+<div class="pollform">
+    <h3 class="pollquestion">{{ poll.question }}</h3>
+    <form action="/polls/{{ poll.id }}/vote/" method="post">
+    <ul class="pollresponselist">
+    {% for response in poll.responses.all %}
+        <li class="pollresponse">
+            <input type="radio" id="poll{{ poll.id }}response{{ forloop.counter }}" name="poll{{ poll.id }}response" value="{{ response.id }}" />
+            <label for="poll{{ poll.id }}response{{ forloop.counter }}">{{ response.answer }}</label>
+        </li>
+    {% endfor %}
+    </ul>
+    <input type="button" id="poll{{ poll.id }}votebutton" value="Vote" />
+    </form>
+</div>
