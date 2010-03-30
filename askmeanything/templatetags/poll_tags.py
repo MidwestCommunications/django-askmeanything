@@ -29,7 +29,7 @@ class PublishedPollFormNode(template.Node):
             poll = PublishedPoll.objects.filter(publication_type=publication_type, publication_id=publication.id).latest().poll
         except ObjectDoesNotExist:
             return ''
-        return '<script type="text/javascript" src="' + poll.get_absolute_url + '"></script>'
+        return '<script type="text/javascript" src="' + poll.get_absolute_url() + '"></script>'
 
 @register.tag
 def show_poll(parser, token):
@@ -45,7 +45,7 @@ class PollFormNode(template.Node):
     
     def render(self, context):
         try:
-            poll = Poll.objects.filter(id=self.poll_id)
+            poll = Poll.objects.get(id=self.poll_id)
         except ObjectDoesNotExist:
             return ''
-        return '<script type="text/javascript" src="' + poll.get_absolute_url + '"></script>'
+        return '<script type="text/javascript" src="' + poll.get_absolute_url() + '"></script>'
