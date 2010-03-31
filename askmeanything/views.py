@@ -58,7 +58,7 @@ def results(request, pollid):
     for response in poll.responses.all():
         poll_results.append({
             'response': response,
-            'percent': round(response.votes / total_votes * 100)
+            'percent': int(round(response.votes / total_votes * 100))
         })
     return render_to_response('poll_results.html', {'poll': poll, 'poll_results': poll_results}, mimetype='text/plain')
 
@@ -73,7 +73,7 @@ def new(request):
             answer_formset = AnswerFormSet(request.POST, instance=new_poll)
             if answer_formset.is_valid():
                 answer_formset.save()
-                return HttpResponseRedirect(reverse('askmeanything.views.publish', kwargs={'pollid': new_poll}))
+                return HttpResponseRedirect(reverse('askmeanything.views.publish', kwargs={'pollid': new_poll.id}))
             else:
                 new_poll.delete()
     
@@ -91,10 +91,11 @@ def publish(request, pollid):
     if not poll.open:
         return HttpResponseGone('This poll is closed and can no longer be published.')
     
+    publish_done = False
+    published_to = []
     if request.method == 'POST':
         publication_formset = PublishFormSet(request.POST)
         if publication_formset.is_valid():
-            published_to = []
             for cleaned_form_data in publication_formset.cleaned_data:
                 if cleaned_form_data['publish']:
                     publication_type = ContentType.objects.get(id=cleaned_form_data['publication_type_id'])
@@ -108,10 +109,7 @@ def publish(request, pollid):
                         if not created:
                             #update published datetime
                             published_poll.save()
-            if published_to:
-                #successfully posted, should redirect somewhere
-                return HttpResponse('You published poll %s.' % pollid)
-        return HttpResponse('The poll was not published.')
+        publish_done = True
     
     allowed_publications = []
     for (app_name, model_name) in poll_settings.PUBLICATION_TYPES:
@@ -124,15 +122,16 @@ def publish(request, pollid):
             for publication_permission in Permission.objects.user_permissions(request.user, perm_name, publication_type.model_class()):
                 allowed_publications.append(publication_permission.content_object)
     
+    publication_form_data = []
+    publication_form_labels = []
     if allowed_publications:
-        publication_form_data = []
-        publication_form_labels = []
         for item in allowed_publications:
             publication_type = ContentType.objects.get_for_model(item)
             publication_form_data.append({'publication_type_id': publication_type.id, 'publication_id': item.id})
             publication_form_labels.append(str(publication_type) + ' - ' + str(item))
-        publication_formset = PublishFormSet(initial=publication_form_data)
-        for i in xrange(len(publication_formset.forms)):
-            publication_formset.forms[i].fields['publish'].label = publication_form_labels[i]
-        return render_to_response('poll_publish.html', {'publication_formset': publication_formset}, context_instance=RequestContext(request))
-    return HttpResponseForbidden('You do not have permission to publish anywhere.')
+        
+    publication_formset = PublishFormSet(initial=publication_form_data)
+    for i in xrange(len(publication_formset.forms)):
+        publication_formset.forms[i].fields['publish'].label = publication_form_labels[i]
+    
+    return render_to_response('poll_publish.html', {'poll': poll, 'publish_done': publish_done, 'published_to': published_to, 'publication_formset': publication_formset}, context_instance=RequestContext(request))

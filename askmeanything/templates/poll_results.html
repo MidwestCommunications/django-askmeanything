@@ -3,7 +3,7 @@
     <ul class="pollresponselist">
     {% for result in poll_results %}
         <li class="pollresponse">
-            <span class="responsetotals">{{ result.percent }}% ({{ result.response.votes }} votes)</span>
+            <span class="responsetotals">{{ result.percent }}% ({{ result.response.votes }} votes)</span> &mdash;
             <span class="responseanswer">{{ result.response.answer }}</span>
         </li>
     {% endfor %}

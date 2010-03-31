@@ -1,5 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <h2>Publishing Poll "{{ poll }}"</h2>
+    
+    {% if publish_done %}
+        {% if published_to %}
+        <p>The poll was published to the following:</p>
+        <ul>
+            {% for publication_name in published_to %}
+            <li>{{ publication_name }}</li>{% endfor %}
+        </ul>
+        {% else %}
+        <p>The poll was not published.</p>
+        {% endif %}
+    <hr />
+    {% endif %}
+    
+    <p>This poll can be embedded in any page on the site with the following tag:</p>
+    <code>{{ poll.get_script_tag }}</code>
+    
+    {% if publication_formset %}
+    <p>Additionally, this poll can be published in the following places:</p>
     {% include "poll_publish_form.html" %}
+    {% endif %}
 {% endblock %}
