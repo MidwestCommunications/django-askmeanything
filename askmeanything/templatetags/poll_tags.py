@@ -7,9 +7,6 @@ from askmeanything.models import Poll, PublishedPoll
 
 register = template.Library()
 
-def get_script_tag_for(poll):
-    return '<script type="text/javascript" src="' + poll.get_absolute_url() + '"></script>'
-
 
 @register.tag
 def show_latest_poll_for(parser, token):
@@ -33,7 +30,7 @@ class PublishedPollFormNode(template.Node):
             poll = PublishedPoll.objects.filter(publication_type=publication_type, publication_id=publication.id).latest().poll
         except ObjectDoesNotExist:
             return ''
-        return get_script_tag_for(poll)
+        return poll.get_script_tag()
 
 
 @register.tag
@@ -58,4 +55,4 @@ class PollFormNode(template.Node):
                 poll = Poll.objects.get(id=int(poll))
             except TypeError, ObjectDoesNotExist:
                 return ''
-        return get_script_tag_for(poll)
+        return poll.get_script_tag()

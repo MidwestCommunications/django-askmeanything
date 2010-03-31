@@ -5,12 +5,14 @@ var pollVoteButton = document.getElementById('poll{{ poll.id }}votebutton');
 var pollVoteSubmission = new XMLHttpRequest();
 
 function pollVote() {
+    pollVoteButton.disabled = true;
     pollVoteSubmission.onreadystatechange = pollStateChange;
     pollVoteSubmission.open(pollForm.method, pollForm.action);
     var postText = '';
     var responses = pollForm.elements['poll{{ poll.id }}response'];
     for (var i = 0; i < responses.length; i++) {
         if (responses[i].checked) postText = responses[i].value
+        responses[i].disabled = true;
     }
     pollVoteSubmission.setRequestHeader('Content-type', 'text/plain');
     pollVoteSubmission.send(postText);

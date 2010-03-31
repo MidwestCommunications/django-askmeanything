@@ -40,15 +40,13 @@ def vote(request, pollid):
         selected_response = poll.responses.get(id=request.raw_post_data)
     except (KeyError, Response.DoesNotExist):
         #go directly to results without voting
-        return HttpResponseRedirect(reverse('askmeanything.views.results', kwargs={'pollid': pollid}))
+        pass
     else:
-        selected_response.votes += 1
-        selected_response.save()
-    
-    votedpolls = request.session.setdefault('votedpolls', [])
-    if pollid in votedpolls:
-        return HttpResponseForbidden("You have already voted in this poll.")
-    request.session['votedpolls'].append(pollid)
+        votedpolls = request.session.setdefault('votedpolls', [])
+        if pollid not in votedpolls:
+            request.session['votedpolls'].append(pollid)
+            selected_response.votes += 1
+            selected_response.save()
     
     return HttpResponseRedirect(reverse('askmeanything.views.results', kwargs={'pollid': pollid}))
 
