@@ -7,6 +7,10 @@ from askmeanything.models import Poll, PublishedPoll
 
 register = template.Library()
 
+def get_script_tag_for(poll):
+    return '<script type="text/javascript" src="' + poll.get_absolute_url() + '"></script>'
+
+
 @register.tag
 def show_latest_poll_for(parser, token):
     try:
@@ -29,23 +33,29 @@ class PublishedPollFormNode(template.Node):
             poll = PublishedPoll.objects.filter(publication_type=publication_type, publication_id=publication.id).latest().poll
         except ObjectDoesNotExist:
             return ''
-        return '<script type="text/javascript" src="' + poll.get_absolute_url() + '"></script>'
+        return get_script_tag_for(poll)
+
 
 @register.tag
 def show_poll(parser, token):
     try:
-        (tag_name, poll_id) = token.split_contents()
+        (tag_name, poll_variable) = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError, "%r tag requires exactly one argument" % token.contents.split()[0]
-    return PollFormNode(poll_id)
+    return PollFormNode(poll_variable)
 
 class PollFormNode(template.Node):
-    def __init__(self, poll_id):
-        self.poll_id = poll_id
+    def __init__(self, poll_variable_name):
+        self.poll_variable = template.Variable(poll_variable_name)
     
     def render(self, context):
         try:
-            poll = Poll.objects.get(id=self.poll_id)
-        except ObjectDoesNotExist:
+            poll = self.poll_variable.resolve(context)
+        except template.VariableDoesNotExist:
             return ''
-        return '<script type="text/javascript" src="' + poll.get_absolute_url() + '"></script>'
+        if not isinstance(poll, Poll):
+            try:
+                poll = Poll.objects.get(id=int(poll))
+            except TypeError, ObjectDoesNotExist:
+                return ''
+        return get_script_tag_for(poll)

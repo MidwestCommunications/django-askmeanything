@@ -12,6 +12,7 @@ from django.db.models import Sum
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 
 from authority.models import Permission
 
@@ -26,6 +27,10 @@ def show(request, pollid):
     poll_form = render_to_string('poll_form.html', {'poll': poll})
     return render_to_response('poll.js', {'poll': poll, 'poll_form': poll_form}, mimetype='text/javascript')
 
+def embed(request, pollid):
+    #for embed in an iframe
+    return render_to_response('poll_frame.html', {'poll_id': pollid})
+
 @require_POST
 def vote(request, pollid):
     #loaded by xmlhttprequest
@@ -34,7 +39,7 @@ def vote(request, pollid):
     try:
         selected_response = poll.responses.get(id=request.raw_post_data)
     except (KeyError, Response.DoesNotExist):
-        #display results without voting
+        #go directly to results without voting
         return HttpResponseRedirect(reverse('askmeanything.views.results', kwargs={'pollid': pollid}))
     else:
         selected_response.votes += 1
@@ -84,9 +89,9 @@ def publish(request, pollid):
     poll = get_object_or_404(Poll, id=pollid)
     
     if not poll.creator == request.user and not request.user.is_superuser:
-        return HttpResponseForbidden("You can only publish polls that you have created.")
+        return HttpResponseForbidden('You can only publish polls that you have created.')
     if not poll.open:
-        return HttpResponseGone("This poll is closed and can no longer be published.")
+        return HttpResponseGone('This poll is closed and can no longer be published.')
     
     if request.method == 'POST':
         publication_formset = PublishFormSet(request.POST)
@@ -107,8 +112,8 @@ def publish(request, pollid):
                             published_poll.save()
             if published_to:
                 #successfully posted, should redirect somewhere
-                return HttpResponse("You published poll %s." % pollid)
-        return HttpResponse("The poll was not published.")
+                return HttpResponse('You published poll %s.' % pollid)
+        return HttpResponse('The poll was not published.')
     
     allowed_publications = []
     for (app_name, model_name) in poll_settings.PUBLICATION_TYPES:
@@ -132,4 +137,4 @@ def publish(request, pollid):
         for i in xrange(len(publication_formset.forms)):
             publication_formset.forms[i].fields['publish'].label = publication_form_labels[i]
         return render_to_response('poll_publish.html', {'publication_formset': publication_formset}, context_instance=RequestContext(request))
-    return HttpResponseForbidden("You do not have permission to publish anywhere.")
+    return HttpResponseForbidden('You do not have permission to publish anywhere.')
