@@ -46,9 +46,9 @@ def vote(request, pollid):
         selected_response.save()
     
     votedpolls = request.session.setdefault('votedpolls', [])
-    #if pollid in votedpolls:
-    #    return HttpResponseForbidden("You have already voted in this poll.")
-    #request.session['votedpolls'].append(pollid)
+    if pollid in votedpolls:
+        return HttpResponseForbidden("You have already voted in this poll.")
+    request.session['votedpolls'].append(pollid)
     
     return HttpResponseRedirect(reverse('askmeanything.views.results', kwargs={'pollid': pollid}))
 
