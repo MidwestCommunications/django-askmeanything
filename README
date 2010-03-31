@@ -1,0 +1,9 @@
+Allows users to create polls which can then be published to any object, such
+as a user profile or a site. Implements per-object permissions with authority.
+
+Requires the following Django apps: auth, contenttypes, sessions, sites,
+authority.
+
+To configure where polls can be published, set POLL_PUBLICATION_TYPES to a
+list (or tuple) of models, given as strings like 'app_name.model_name'.
+Defaults to (AUTH_PROFILE_MODULE, 'sites.site').
