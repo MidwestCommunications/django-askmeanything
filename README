@@ -4,6 +4,23 @@ as a user profile or a site. Implements per-object permissions with authority.
 Requires the following Django apps: auth, contenttypes, sessions, sites,
 authority.
 
-To configure where polls can be published, set POLL_PUBLICATION_TYPES to a
-list (or tuple) of models, given as strings like 'app_name.model_name'.
+Configuration:
+To configure where polls can be published, set POLL_PUBLICATION_TYPES in
+settings.py to a list (or tuple) of models, each given as a string in the
+format 'app_name.model_name'.
 Defaults to (AUTH_PROFILE_MODULE, 'sites.site').
+
+Templates:
+See the test project for how to set up poll creation and publication pages
+(especially the 'poll_create.html' and 'poll_publish.html' templates).
+
+Template Tags:
+{% load poll_tags %}
+
+{% show_poll poll %}
+Pass this a poll id or poll object. It will generate the necessary script to
+load and display that poll.
+
+{% show_latest_poll_for object %}
+Pass this an object of a type from POLL_PUBLICATION_TYPES. It will generate
+the script to load and display the latest poll published to that object.
