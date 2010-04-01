@@ -1,18 +1,13 @@
-from django import forms
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseGone
 from django.shortcuts import render_to_response, get_object_or_404
-from django.conf import settings
-from django.utils.encoding import smart_unicode
-from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.http import require_POST
 from django.core.urlresolvers import reverse
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.db.models import Sum
 
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.models import Site
 
 from authority.models import Permission
 
