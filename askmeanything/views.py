@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseGone
+from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.core.urlresolvers import reverse
@@ -82,9 +82,9 @@ def publish(request, pollid):
     poll = get_object_or_404(Poll, id=pollid)
     
     if not poll.creator == request.user and not request.user.is_superuser:
-        return HttpResponseForbidden('You can only publish polls that you have created.')
+        return HttpResponseForbidden('You cannot publish a poll that you did not create.')
     if not poll.open:
-        return HttpResponseGone('This poll is closed and can no longer be published.')
+        raise Http404
     
     publish_done = False
     published_to = []
