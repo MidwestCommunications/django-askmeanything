@@ -20,7 +20,7 @@ class Poll(models.Model):
     
     @models.permalink
     def get_absolute_url(self):
-        return ('askmeanything.views.show', (), {'pollid': self.id})
+        return ('askmeanything.views.show', (), {'poll_id': self.id})
     
     def get_script_tag(self):
         return '<script type="text/javascript" src="' + self.get_absolute_url() + '"></script>'
