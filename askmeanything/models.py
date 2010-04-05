@@ -23,7 +23,7 @@ class Poll(models.Model):
         return ('askmeanything.views.show', (), {'poll_id': self.id})
     
     def get_script_tag(self):
-        return '<script type="text/javascript" src="' + self.get_absolute_url() + '"></script>'
+        return '<script type="text/javascript" src="%s"></script>' % self.get_absolute_url()
     
     class Meta:
         ordering = ['-created']
