@@ -6,5 +6,4 @@ urlpatterns = patterns('askmeanything.views',
     (r'^(?P<poll_id>\d+)/results/$', 'results'),
     (r'^(?P<poll_id>\d+)/vote/$', 'vote'),
     (r'^new/$', 'new'),
-    (r'^(?P<poll_id>\d+)/publish/$', 'publish'),
 )

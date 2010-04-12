@@ -82,12 +82,5 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'south',
-    'authority',
     'askmeanything'
-)
-
-POLL_PUBLICATION_TYPES = (
-    'auth.user',
-    'auth.group',
-    'sites.site'
 )

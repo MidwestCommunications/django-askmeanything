@@ -2,11 +2,7 @@ from operator import or_
 
 from django.db import models
 
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User
-
-import poll_settings
 
 class Poll(models.Model):
     question = models.CharField(max_length=200)
@@ -23,7 +19,7 @@ class Poll(models.Model):
         return ('askmeanything.views.show', (), {'poll_id': self.id})
     
     def get_script_tag(self):
-        return '<script type="text/javascript" src="%s"></script>' % self.get_absolute_url()
+        return '<script type="text/javascript" src="%sembed/"></script>' % self.get_absolute_url()
     
     class Meta:
         ordering = ['-created']
@@ -42,19 +38,3 @@ def get_publication_choices():
     for (app_name, model_name) in poll_settings.PUBLICATION_TYPES:
         q_list.append(models.Q(app_label=app_name, model=model_name))
     return reduce(or_, q_list)
-
-class PublishedPoll(models.Model):
-    poll = models.ForeignKey(Poll, related_name='publishings')
-    
-    publication_type = models.ForeignKey(ContentType, limit_choices_to=get_publication_choices())
-    publication_id = models.PositiveIntegerField()
-    publication = generic.GenericForeignKey('publication_type', 'publication_id')
-    
-    published = models.DateTimeField(auto_now=True)
-    
-    def __unicode__(self):
-        return '"' + str(self.poll) + '" on ' + str(self.publication)
-    
-    class Meta:
-        ordering = ['-published']
-        get_latest_by = ['published']
