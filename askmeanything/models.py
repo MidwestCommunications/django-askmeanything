@@ -32,9 +32,3 @@ class Response(models.Model):
     
     def __unicode__(self):
         return self.answer
-
-def get_publication_choices():   
-    q_list = []
-    for (app_name, model_name) in poll_settings.PUBLICATION_TYPES:
-        q_list.append(models.Q(app_label=app_name, model=model_name))
-    return reduce(or_, q_list)

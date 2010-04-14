@@ -8,7 +8,6 @@ from django.db.models import Sum
 from django.conf import settings
 
 from django.contrib.auth.decorators import permission_required
-from django.contrib.contenttypes.models import ContentType
 
 from models import Poll, Response
 from forms import PollForm, AnswerFormSet
@@ -56,7 +55,7 @@ def results(request, poll_id):
     return render_to_response('poll_results.html', {'poll': poll, 'poll_results': poll_results}, mimetype='text/plain')
 
 @permission_required('askmeanything.add_poll')
-def new(request):
+def new(request, post_save_redirect=None):
     if request.method == 'POST':
         poll_form = PollForm(request.POST)
         
@@ -66,8 +65,13 @@ def new(request):
             answer_formset = AnswerFormSet(request.POST, instance=new_poll)
             if answer_formset.is_valid():
                 answer_formset.save()
-                redirect_to = getattr(settings, 'ASKMEANYTHING_NEW_REDIRECT', new_poll)
-                return redirect(new_poll)
+                redirect_to = new_poll
+                if post_save_redirect:
+                    if isinstance(post_save_redirect, str) or isinstance(post_save_redirect, unicode):
+                        redirect_to = post_save_redirect % new_poll.__dict__
+                    else:
+                        redirect_to = post_save_redirect(new_poll)
+                return redirect(redirect_to)
             else:
                 new_poll.delete()
     
