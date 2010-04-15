@@ -1,7 +1,7 @@
-<form method='post'>
-    <table>
+<form id="pollcreateform" method="post">
+    <table id="pollcreateformtable">
         {{ poll_form.as_table }}
         {{ answer_formset.as_table }}
-        <tr><td>&nbsp;</td><td><input type='submit' value='Create Poll' /></td></tr>
+        <tr id="pollcreateformsubmitrow"><td>&nbsp;</td><td><input type="submit" value="Create Poll" /></td></tr>
     </table>
 </form>

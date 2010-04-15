@@ -12,3 +12,6 @@ class PollForm(forms.ModelForm):
 ResponseFormSet = inlineformset_factory(Poll, Response, fields=('poll', 'answer'), extra=5, can_delete=False)
 class AnswerFormSet(ResponseFormSet):
     poll = forms.IntegerField(widget=forms.HiddenInput)
+    def _get_media(self):
+        return forms.Media(js=('askmeanything/pollresponsesform.js',))
+    media = property(_get_media)
