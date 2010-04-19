@@ -14,13 +14,13 @@ from forms import PollForm, AnswerFormSet
 
 def show(request, poll_id):
     #mostly for embed in an iframe
-    return render_to_response('poll_page.html', {'poll_id': poll_id})
+    return render_to_response('askmeanything/poll_page.html', {'poll_id': poll_id})
 
 def embed(request, poll_id):
     #this will be the src of a script tag
     poll = get_object_or_404(Poll, id=poll_id)
-    poll_form = render_to_string('poll_form.html', {'poll': poll})
-    return render_to_response('poll.js', {'poll': poll, 'poll_form': poll_form}, mimetype='text/javascript')
+    poll_form = render_to_string('askmeanything/poll_form.html', {'poll': poll})
+    return render_to_response('askmeanything/poll.js', {'poll': poll, 'poll_form': poll_form}, mimetype='text/javascript')
 
 @require_POST
 def vote(request, poll_id):
@@ -52,7 +52,7 @@ def results(request, poll_id):
             'response': response,
             'percent': int(round(response.votes / total_votes * 100))
         })
-    return render_to_response('poll_results.html', {'poll': poll, 'poll_results': poll_results}, mimetype='text/plain')
+    return render_to_response('askmeanything/poll_results.html', {'poll': poll, 'poll_results': poll_results}, mimetype='text/plain')
 
 @permission_required('askmeanything.add_poll')
 def new(request, post_save_redirect=None):
