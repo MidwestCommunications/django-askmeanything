@@ -1,18 +1,11 @@
-Allows users to create polls which can then be published to any object, such
-as a user profile or a site. Implements per-object permissions with authority.
+Allows users to create polls which can then be embedded in any page with a
+<script> tag. Uses AJAX for voting and retrieving results.
 
-Requires the following Django apps: auth, contenttypes, sessions, sites,
-authority.
-
-Configuration:
-To configure where polls can be published, set POLL_PUBLICATION_TYPES in
-settings.py to a list (or tuple) of models, each given as a string in the
-format 'app_name.model_name'.
-Defaults to (AUTH_PROFILE_MODULE, 'sites.site').
+Requires the following Django apps: auth, sessions.
 
 Templates:
-See the test project for how to set up poll creation and publication pages
-(especially the 'poll_create.html' and 'poll_publish.html' templates).
+See the test project for how to set up the poll creation page (especially the
+'poll_create.html' template).
 
 Template Tags:
 {% load poll_tags %}
@@ -20,7 +13,3 @@ Template Tags:
 {% show_poll poll %}
 Pass this a poll id or poll object. It will generate the necessary script to
 load and display that poll.
-
-{% show_latest_poll_for object %}
-Pass this an object of a type from POLL_PUBLICATION_TYPES. It will generate
-the script to load and display the latest poll published to that object.
