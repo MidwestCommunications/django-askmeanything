@@ -78,4 +78,4 @@ def new(request, post_save_redirect=None):
     poll_form = PollForm()
     answer_formset = AnswerFormSet()
     
-    return render_to_response('poll_create.html', {'poll_form': poll_form, 'answer_formset': answer_formset}, context_instance=RequestContext(request))
+    return render_to_response('askmeanything/poll_create.html', {'poll_form': poll_form, 'answer_formset': answer_formset}, context_instance=RequestContext(request))
