@@ -6,7 +6,7 @@ Depends on the following Django apps: auth, sessions.
 You will need to copy the directory askmeanything/media/askmeanything to your
 site's MEDIA_ROOT or create a symlink.
 
-Sprinkler also requires jQuery v1.3 for the nice calendar widget. If you are
+AskMeAnything also requires jQuery v1.3 for the nice calendar widget. If you are
 not already using jQuery, you can add the following script tag to your
 template for the publish form page:
 
