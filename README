@@ -13,13 +13,35 @@ template for the publish form page:
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 
 
+Settings (in settings.py):
+ASKMEANYTHING_POST_CREATE_URL can be set to a string. This is the URL that
+AskMeAnything will redirect to after creating a new poll. The default view and
+template are quite unspectacular, so setting this is highly recommended.
+
+
 Templates:
 See the test project for how to set up the poll creation page (especially the
-'poll_create.html' template).
+'poll_create.html' and 'poll_post_create.html' templates).
+
+
+The Poll Model:
+The poll model has the following attributes:
+    Poll.question, a string
+    Poll.creator, a User
+    Poll.created, a DateTime
+It also has a handy method:
+    Poll.get_script_tag(), returns the embed <script> tag for this poll
+
 
 Template Tags:
 {% load poll_tags %}
 
 {% show_poll poll %}
-Pass this a poll id or poll object. It will generate the necessary script to
+Pass this a poll object or poll id. It will generate the necessary script to
 load and display that poll.
+
+{% get_last_poll_for_user user %}
+Pass this a user object or user id. It places a variable called last_poll into
+the current context, containing the last poll created by this user (the actual
+poll object). This can be used to (for example) show the user's last created
+poll on their profile page.

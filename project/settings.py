@@ -84,3 +84,5 @@ INSTALLED_APPS = (
     'south',
     'askmeanything'
 )
+
+ASKMEANYTHING_POST_CREATE_URL = '/polldone/'

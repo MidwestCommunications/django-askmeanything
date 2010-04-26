@@ -6,7 +6,7 @@ class AnswerInline(admin.TabularInline):
     extra = 5
 
 class PollAdmin(admin.ModelAdmin):
-    list_display = ('question', 'creator', 'created', 'open')
+    list_display = ('question', 'creator', 'created')
     inlines = [AnswerInline]
 
 admin.site.register(Poll, PollAdmin)

@@ -9,7 +9,6 @@ class Poll(models.Model):
     
     creator = models.ForeignKey(User, related_name='polls', editable=False)
     created = models.DateTimeField(auto_now_add=True, editable=False)
-    open = models.BooleanField(default=True)
     
     def __unicode__(self):
         return self.question
@@ -19,11 +18,12 @@ class Poll(models.Model):
         return ('askmeanything.views.show', (), {'poll_id': self.id})
     
     def get_script_tag(self):
-        return '<script type="text/javascript" src="%sembed/"></script>' % self.get_absolute_url()
+        return '<script type="text/javascript" src="%sembed/"></script>' % \
+            self.get_absolute_url()
     
     class Meta:
         ordering = ['-created']
-        get_latest_by = ['created']
+        get_latest_by = 'created'
 
 class Response(models.Model):
     poll = models.ForeignKey(Poll, related_name='responses')

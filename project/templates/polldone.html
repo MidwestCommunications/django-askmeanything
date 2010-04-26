@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% load poll_tags %}
+    {% get_last_poll_for_user current_user %}
+    {% show_poll last_poll %}
+    <p>Embed tag:</p>
+    {{ last_poll.get_script_tag }}
+{% endblock content %}

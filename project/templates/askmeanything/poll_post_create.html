@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>The poll was created:</p>
+    
+    <h3 class="pollquestion">{{ poll.question }}</h3>
+    <ul class="pollresponselist">
+    {% for response in poll.responses.all %}
+        <li class="pollresponse">{{ response.answer }}</li>
+    {% endfor %}
+    </ul>
+    
+    <p>This poll can be embedded in any page on the site with the following tag:</p>
+    <code>{{ poll.get_script_tag }}</code>
+{% endblock %}
